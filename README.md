@@ -1,4 +1,4 @@
-# CS:GO Griefing Bans
+# CS:GO Griefing Bans / Steam Temp Bans
 Detect whether someone is griefing banned in CS:GO or detect whether someone has been temporarily banned in another game.
 
 
