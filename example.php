@@ -1,54 +1,42 @@
 <?php
-$message = "";
-if(isset($_POST['SubmitButton'])){ //check if form was submitted
-  $input = $_POST['inputText']; //get input text
-  //$message = "Success! You entered: ".$input; // Is used to test input to see whether SteamID64 was successfully received by POST Request
-}    
-?>
+define('API_KEY', 'XYZAPIKEYABC');//Set Steam API key
 
-<?php
-$xml_link = "https://steamcommunity.com/profiles/" . $input . "/?xml=1";
-$result = simplexml_load_file($xml_link) or die("Error: Cannot create ProfileVACCheck Object");
+if (isset($_POST['SubmitButton']) && !empty($_POST['SubmitButton'])) { //Form was submitted and not empty
+    $input = $_POST['inputText']; //get input text
+} else {
+    echo "Did not come from form or input was empty";
+    exit;
+}
 
-$SteamID64 = $result->steamID64;
+$profile_XML_data = simplexml_load_file("https://steamcommunity.com/profiles/{$input}/?xml=1") or die("Error: Cannot create ProfileVACCheck Object");
+$SteamID64 = $profile_XML_data->steamID64;
 
-$url = "http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" . $SteamAPIKey . "&steamids=" . $SteamID64 . "/";
+//Make API call
+$api_call = json_decode(file_get_contents("https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" . API_KEY . "&steamids={$SteamID64}"), true);
 
+$ban_data = $api_call['players'][0];
+$api_profile_is_vac_banned = $ban_data['VACBanned'];
+$days_since_last_ban = $ban_data['DaysSinceLastBan'];
+$VAC_bans = $ban_data['NumberOfVACBans'];
+$game_bans = $ban_data['NumberOfGameBans'];
 
-//Make Connection
-
-$json = json_decode(file_get_contents($url), true);
-
-// Dump JSON
-$profileVAC = $result->vacBanned;
-$APIVacBans = $json["players"][0]['VACBanned'];
-$DaysSinceLastBan = $json["players"][0]['DaysSinceLastBan'];
-$NumberOfVACBans = $json["players"][0]['NumberOfVACBans'];
-
-if ($profileVAC == 0){
+if ($profile_XML_data->vacBanned === 0) {
     $profileVACTest = "No VAC on Profile";
-}
-else{
-    $profileVACTest == "VAC on Profile";
-}
-
-if ($profileVAC == 0 and $APIVacBans == 1){
-    $APIVACCheck = "YES";
-    $Assumption = "This user seems to be griefing banned";
-}
-else{
+    if ($api_profile_is_vac_banned === 1) {
+        $APIVACCheck = "YES";
+        $Assumption = "This user seems to be griefing banned";
+    }
+} else {
+    $profileVACTest = "VAC on Profile";
     $APIVACCheck = "NO";
     $Assumption = "This user is not griefing banned";
 }
 
-echo "ProfileBan Status: " . $profileVACTest;
-echo "<br> APIBan Status: " . $APIVacBans;
-echo "<br> Days Since Last Ban: " . $DaysSinceLastBan;
-echo "<br> Number of VAC Bans: " . $NumberOfVACBans;
-echo "<br> Is Valid for Griefing: " . $APIVACCheck;
-echo "<br>";
-echo "<br>";
-echo "Assumption: " . $Assumption; // Just make a sentence with whether its a griefing ban or not
-
-
-?>
+echo "ProfileBan Status: {$profileVACTest}<br>";
+echo "APIBan Status: {$api_profile_is_vac_banned}<br>";
+echo "Days Since Last Ban: {$days_since_last_ban}<br>";
+echo "Number of VAC Bans: {$VAC_bans}<br>";
+echo "Number of Game Bans: {$game_bans}<br>";
+echo "Is Valid for Griefing: {$APIVACCheck}<br>";
+echo "<br><br>";
+echo "Assumption: {$Assumption}"; // Just make a sentence with whether its a griefing ban or not
