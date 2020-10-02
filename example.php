@@ -1,7 +1,7 @@
 <?php
 define('API_KEY', 'XYZAPIKEYABC');//Set Steam API key
 
-if (isset($_POST['SubmitButton']) && !empty($_POST['SubmitButton'])) { //Form was submitted and not empty
+if (isset($_POST['SubmitButton']) && !empty($_POST['inputText'])) { //Form was submitted and not empty
     $input = $_POST['inputText']; //get input text
 } else {
     echo "Did not come from form or input was empty";
