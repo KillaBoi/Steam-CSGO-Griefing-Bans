@@ -1,4 +1,6 @@
 # CS:GO Griefing Bans / Steam Temp Bans
+
+This repo has been archived as [@ValveSoftware](https://github.com/valvesoftware) gives temporary griefing bans now instead of a 30 day global cooldown.<br><br>
 Detect whether someone is griefing banned in CS:GO or detect whether someone has been temporarily banned in another game.
 
 
